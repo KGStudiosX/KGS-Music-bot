@@ -15,28 +15,16 @@ async def on_ready():
 
 @bot.command()
 async def help2(ctx):
-    await ctx.send("""
-        ```
-        Syntax:
-    url!<command> [Options...]
-    
-Type url!help [Command...] to get more info of a command.
-You can also type url!help [Category...] for more info of a category.
-
-No Category:
-    help            - Shows this message.
-Playback Control:
-    join            - Join voice channel.
-    leave            - Leave voice channel.
-    play [URL...]    - Starts playing song, provided in url.
-    pause            - Pause current song.
-    resume            - Resume current song.
-    stop            - Stops current song.
-Other:
-    record             - Starts playing "Radio Record" (Russia).
-    ytdl            - Not working.
-    ```
-    """)
+    _embed = discord.Embed(title="Help", description="List of commands", color=0x0080ff)
+    _embed.add_field(name="help", value="Shows this message.", inline=True)
+    _embed.add_field(name="join", value="Join voice channel.", inline=True)
+    _embed.add_field(name="leave", value="Leave voice channel.", inline=True)
+    _embed.add_field(name="play [URL...]", value="Starts playing song, provided in url.", inline=True)
+    _embed.add_field(name="pause", value="Pause current song.", inline=True)
+    _embed.add_field(name="resume", value="Resume current song.", inline=True)
+    _embed.add_field(name="stop", value="Stops current song.", inline=True)
+    _embed.add_field(name="record", value="Starts playing "Radio Record" (Russia).", inline=False)
+    await ctx.send(content="Syntax:\n    url!<command> [Options...]\n\nType url!help [Command...] to get more info of a command.\nYou can also type url!help [Category...] for more info of a category.", embed=_embed)
 
 @bot.command()
 async def play(ctx, url):
