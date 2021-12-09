@@ -3,8 +3,9 @@ from discord.ext import commands
 import time
 import asyncio
 from discord.utils import get
-from youtube_dl import YoutubeDL
+#from youtube_dl import YoutubeDL
 import json
+import os
 
 bot = commands.Bot(command_prefix = "url!")
 client = discord.Client()
@@ -67,20 +68,10 @@ async def stop(ctx):
 
 @bot.command()
 async def ytdl(ctx, *, url):
-    await ctx.send("Загрузка...")
-    YDL_OPTIONS = {
-        'format': 'bestaudio',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'outtmpl': 'song.%(ext)s',
-    }
-    with YoutubeDL(YDL_OPTIONS) as ydl:
-        ydl.download(url)
+    await ctx.send("Получение ссылки...")
+    videoplayback = os.popen("yt-dlp --skip-download --print urls -f 140 {}".format(url)).read()
     await ctx.send("Воспроизведение...")
-    vc.play(discord.FFmpegPCMAudio('song.mp3'), after=lambda e: print('done', e))
+    vc.play(discord.FFmpegPCMAudio(videoplayback), after=lambda e: print('done', e))
 
 
 @bot.command()
