@@ -68,10 +68,10 @@ async def stop(ctx):
 
 @bot.command()
 async def ytdl(ctx, *, url):
-    await ctx.send("Получение ссылки...")
-    videoplayback = os.popen("yt-dlp --skip-download --print urls -f 140 {}".format(url)).read()
+    await ctx.send("Загрузка...")
+    os.system('yt-dlp --output /tmp/song.mp3 -f 140 "{}"'.format(url))
     await ctx.send("Воспроизведение...")
-    vc.play(discord.FFmpegPCMAudio(videoplayback), after=lambda e: print('done', e))
+    vc.play(discord.FFmpegPCMAudio("/tmp/song.mp3"), after=lambda e: print('done', e))
 
 
 @bot.command()
