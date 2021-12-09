@@ -37,7 +37,7 @@ async def play(ctx, url):
     if voice_channel!= None:
         vc.play(discord.FFmpegPCMAudio(url), after=lambda e: print('done', e))
     else:
-        await ctx.sned('Сначала войди в войс.')
+        await ctx.send('Сначала войди в войс.')
 
 @bot.command()
 async def join(ctx):
@@ -94,7 +94,7 @@ async def record(ctx):
     if voice_channel!= None:
         vc.play(discord.FFmpegPCMAudio("http://radiorecord.hostingradio.ru/rr_main96.aacp"), after=lambda e: print('done', e))
     else:
-        await ctx.sned('Сначала войди в войс.')
+        await ctx.send('Сначала войди в войс.')
 
 
 @bot.command()
@@ -108,7 +108,7 @@ async def nightride(ctx):
     if voice_channel!= None:
         vc.play(discord.FFmpegPCMAudio("https://stream.nightride.fm/nightride.m4a"), after=lambda e: print('done', e))
     else:
-        await ctx.sned('Сначала войди в войс.')
+        await ctx.send('Сначала войди в войс.')
 
 @bot.command()
 async def radio(ctx, c1, c2):
