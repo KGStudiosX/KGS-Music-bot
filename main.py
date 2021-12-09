@@ -23,7 +23,7 @@ async def help2(ctx):
     _embed.add_field(name="pause", value="Pause current song.", inline=True)
     _embed.add_field(name="resume", value="Resume current song.", inline=True)
     _embed.add_field(name="stop", value="Stops current song.", inline=True)
-    _embed.add_field(name="record", value="Starts playing "Radio Record" (Russia).", inline=False)
+    _embed.add_field(name="record", value="Starts playing \"Radio Record\" (Russia).", inline=False)
     await ctx.send(content="Syntax:\n    url!<command> [Options...]\n\nType url!help [Command...] to get more info of a command.\nYou can also type url!help [Category...] for more info of a category.", embed=_embed)
 
 @bot.command()
