@@ -146,11 +146,12 @@ async def radio_list(ctx):
 
 @bot.command()
 async def recordq(ctx):
-    await ctx.send("Парсинг, пожалуйста подождите...")
+    # await ctx.send("Парсинг, пожалуйста подождите...")
     tracklist = parsejson()
-    await ctx.send("Создание embed...")
-    _embed = discord.Embed(title="Song name", description="Что сейчас играет?", color=0x0080ff)
-    _embed.add_field(name=tracklist["artist"], value=tracklist["song"], inline=True)
+    # await ctx.send("Создание embed...")
+    # _embed = discord.Embed(title="Song name", description="Что сейчас играет?", color=0x0080ff)
+    _embed = discord.Embed(title=tracklist["song"], description=tracklist["artist"], color=0x0080ff)
+    # _embed.add_field(name=tracklist["artist"], value=tracklist["song"], inline=True)
     await ctx.send(embed=_embed)
 
 bot.run('OTE3MTQ4NDA0MTM0NjA0ODEw.Ya0fAw.eYIuyZhvFi2faUeCDG0MHfOatlE')
