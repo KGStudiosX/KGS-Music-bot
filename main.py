@@ -14,6 +14,27 @@ client = discord.Client()
 async def on_ready():
     print("Бот готов!")
 
+def parsejson():
+    print("Downloading...")
+    radioid = 15016
+    os.system("curl https://www.radiorecord.ru/api/stations/now/ > /tmp/list.json")
+    print("Opening file...")
+    recordlist = json.load(open("/tmp/list.json"))
+    for i in recordlist["result"]:
+        if i["id"] == radioid:
+            print("Founded record dance radio")
+            print("Getting info...")
+            recordtrack = i["track"]
+            break
+        else:
+            pass
+    recordtrackinfo = {
+        "song": recordtrack["song"],
+        "artist": recordtrack["artist"]
+    }
+    print("Parser work done!")
+    return recordtrackinfo    
+
 @bot.command()
 async def help2(ctx):
     _embed = discord.Embed(title="Help", description="List of commands", color=0x0080ff)
@@ -122,5 +143,14 @@ async def radio(ctx, c1, c2):
 async def radio_list(ctx):
     radio_list = json.load(open("radio.json"))
     await ctx.send(radio_list)
+
+@bot.command()
+async def recordq(ctx):
+    await ctx.send("Парсинг, пожалуйста подождите...")
+    tracklist = parsejson()
+    await ctx.send("Создание embed...")
+    _embed = discord.Embed(title="Song name", description="Что сейчас играет?", color=0x0080ff)
+    _embed.add_field(name=tracklist["artist"], value=tracklist["song"], inline=True)
+    await ctx.send(embed=_embed)
 
 bot.run('OTE3MTQ4NDA0MTM0NjA0ODEw.Ya0fAw.eYIuyZhvFi2faUeCDG0MHfOatlE')
