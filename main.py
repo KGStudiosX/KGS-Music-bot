@@ -6,32 +6,13 @@ from discord.utils import get
 #from youtube_dl import YoutubeDL
 import json
 import os
-from google.cloud import dialogflow
 
 bot = commands.Bot(command_prefix = "url!")
 client = discord.Client()
-session_client = dialogflow.SessionsClient()
-session = session_client.session_path("small-talk-9lfa", 1)
 
 @bot.event
 async def on_ready():
     print("Бот готов!")
-
-@bot.event
-async def on_message(message):
-    await bot.process_commands(message)
-    if (message.content.startswith('url!')):
-        print("Command!") # Не обращайте внимание.. 
-        pass
-    else:
-        print("Message content: {}".format(message.content))
-        text_input = dialogflow.TextInput(text=message.content, language_code="ru")
-        query_input = dialogflow.QueryInput(text=text_input)
-        response = session_client.detect_intent(
-            request={"session": session, "query_input": query_input}
-        )
-        print(response.query_result.fulfillment_text)
-        await bot.change_presence(activity=discord.Game(name=response.query_result.fulfillment_text))    
 
 @bot.command()
 async def help2(ctx):
