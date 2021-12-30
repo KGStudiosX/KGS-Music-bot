@@ -1,0 +1,10 @@
+[
+	{
+		"ver": 1.0,
+		"changelog": "Bot release, fixed ytdl"
+	},
+	{
+		"ver": 1.1,
+		"changelog": "Fixed bot cve(shell exec), added more commands, fixed help command"
+	}
+]

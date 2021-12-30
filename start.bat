@@ -1,1 +1,2 @@
+set GOOGLE_APPLICATION_CREDENTIALS=key.json
 py main.py

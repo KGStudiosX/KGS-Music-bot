@@ -6,37 +6,36 @@ from discord.utils import get
 #from youtube_dl import YoutubeDL
 import json
 import os
+from google.cloud import dialogflow
+from funcs import *
 
-bot = commands.Bot(command_prefix = "url!")
+bot = commands.Bot(command_prefix = "url!", help_command=None)
 client = discord.Client()
+session_client = dialogflow.SessionsClient()
+session = session_client.session_path("small-talk-9lfa", 1)
 
 @bot.event
 async def on_ready():
     print("Бот готов!")
 
-def parsejson():
-    print("Downloading...")
-    radioid = 15016
-    os.system("curl https://www.radiorecord.ru/api/stations/now/ > /tmp/list.json")
-    print("Opening file...")
-    recordlist = json.load(open("/tmp/list.json"))
-    for i in recordlist["result"]:
-        if i["id"] == radioid:
-            print("Founded record dance radio")
-            print("Getting info...")
-            recordtrack = i["track"]
-            break
-        else:
-            pass
-    recordtrackinfo = {
-        "song": recordtrack["song"],
-        "artist": recordtrack["artist"]
-    }
-    print("Parser work done!")
-    return recordtrackinfo    
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+    if (message.content.startswith('url!')):
+        print("Command!") # Не обращайте внимание.. 
+        pass
+    else:
+        print("Message content: {}".format(message.content))
+        text_input = dialogflow.TextInput(text=message.content, language_code="ru")
+        query_input = dialogflow.QueryInput(text=text_input)
+        response = session_client.detect_intent(
+            request={"session": session, "query_input": query_input}
+        )
+        print(response.query_result.fulfillment_text)
+        await bot.change_presence(activity=discord.Game(name=response.query_result.fulfillment_text))    
 
 @bot.command()
-async def help2(ctx):
+async def help(ctx):
     _embed = discord.Embed(title="Help", description="List of commands", color=0x0080ff)
     _embed.add_field(name="help", value="Shows this message.", inline=True)
     _embed.add_field(name="join", value="Join voice channel.", inline=True)
@@ -45,14 +44,17 @@ async def help2(ctx):
     _embed.add_field(name="pause", value="Pause current song.", inline=True)
     _embed.add_field(name="resume", value="Resume current song.", inline=True)
     _embed.add_field(name="stop", value="Stops current song.", inline=True)
-    _embed.add_field(name="record", value='Starts playing "Radio Record" (Russia).', inline=False)
+    _embed.add_field(name="record", value='Starts playing "Radio Record" (Russia).', inline=True)
+    _embed.add_field(name="ytdl", value='Playing video from youtube.', inline=True)
+    _embed.add_field(name="recordq", value='Current track playing in Radio Record.', inline=True)
+    _embed.add_field(name="changelog", value='Bot changelog.', inline=False)
     await ctx.send(content="Syntax:\n    url!<command> [Options...]\n\nType url!help [Command...] to get more info of a command.\nYou can also type url!help [Category...] for more info of a category.", embed=_embed)
 
 @bot.command()
-async def play(ctx, url):
-    await ctx.send("Проверка на взлом севрера...")
-    test = list(url)
-    if test[0] == "$":
+async def play(ctx, *, url):
+    await ctx.send("Проверка на попытку взлома севрера...")
+    test = antihack(url)
+    if test == False:
         await ctx.send("!!! WARNING !!!")
         await ctx.send("!!! ОБНАРУЖЕНА ПОПЫТКА ВЗЛОМА СЕРВЕРА !!!")
     else:
@@ -95,9 +97,9 @@ async def stop(ctx):
 
 @bot.command()
 async def ytdl(ctx, *, url):
-    await ctx.send("Проверка на взлом севрера...")
-    test = list(url)
-    if test[0] == "$":
+    await ctx.send("Проверка на попытку взлома севрера...")
+    test = antihack(url)
+    if test == False:
         await ctx.send("!!! WARNING !!!")
         await ctx.send("!!! ОБНАРУЖЕНА ПОПЫТКА ВЗЛОМА СЕРВЕРА !!!")
     else:
@@ -153,5 +155,22 @@ async def recordq(ctx):
     _embed = discord.Embed(title=tracklist["song"], description=tracklist["artist"], color=0x0080ff)
     # _embed.add_field(name=tracklist["artist"], value=tracklist["song"], inline=True)
     await ctx.send(embed=_embed)
+
+@bot.command()
+async def log4shell(ctx):
+    await ctx.send("чел, я на питоне написан")
+    time.sleep(0.099)
+    await ctx.send("какая нахуй java?")
+    time.sleep(0.099)
+    await ctx.send("иди нахуй со своим log4shell")
+
+@bot.command()
+async def changelog(ctx):
+    _embed = discord.Embed(title="Bot changelog", description="Bot changelog", color=0x0080ff)
+    changelogfile = json.load(open("changelog.json"))
+    for i in changelogfile:
+        _embed.add_field(name=i["ver"], value=i["changelog"], inline=True)
+    await ctx.send(embed=_embed)
+
 
 bot.run('OTE3MTQ4NDA0MTM0NjA0ODEw.Ya0fAw.eYIuyZhvFi2faUeCDG0MHfOatlE')

@@ -1,3 +1,5 @@
+google
+google-cloud-dialogflow
 youtube-dl
 yt-dlp
 discord.py
