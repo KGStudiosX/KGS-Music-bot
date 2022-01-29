@@ -8,7 +8,7 @@ import json
 import os
 from funcs import *
 
-bot = commands.Bot(command_prefix = "url2!", help_command=None)
+bot = commands.Bot(command_prefix = "url!", help_command=None)
 client = discord.Client()
 
 @bot.event
@@ -18,7 +18,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
-    if (message.content.startswith('url2!')):
+    if (message.content.startswith('url!')):
         print("Command!") # Не обращайте внимание.. 
         pass
 
