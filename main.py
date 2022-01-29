@@ -6,13 +6,10 @@ from discord.utils import get
 #from youtube_dl import YoutubeDL
 import json
 import os
-from google.cloud import dialogflow
 from funcs import *
 
-bot = commands.Bot(command_prefix = "url!", help_command=None)
+bot = commands.Bot(command_prefix = "url2!", help_command=None)
 client = discord.Client()
-session_client = dialogflow.SessionsClient()
-session = session_client.session_path("small-talk-9lfa", 1)
 
 @bot.event
 async def on_ready():
@@ -21,18 +18,9 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
-    if (message.content.startswith('url!')):
+    if (message.content.startswith('url2!')):
         print("Command!") # Не обращайте внимание.. 
         pass
-    else:
-        print("Message content: {}".format(message.content))
-        text_input = dialogflow.TextInput(text=message.content, language_code="ru")
-        query_input = dialogflow.QueryInput(text=text_input)
-        response = session_client.detect_intent(
-            request={"session": session, "query_input": query_input}
-        )
-        print(response.query_result.fulfillment_text)
-        await bot.change_presence(activity=discord.Game(name=response.query_result.fulfillment_text))    
 
 @bot.command()
 async def help(ctx):
@@ -52,7 +40,7 @@ async def help(ctx):
 
 @bot.command()
 async def play(ctx, *, url):
-    await ctx.send("Проверка на попытку взлома севрера...")
+#    await ctx.send("Проверка на попытку взлома севрера...")
     test = antihack(url)
     if test == False:
         await ctx.send("!!! WARNING !!!")
@@ -97,7 +85,7 @@ async def stop(ctx):
 
 @bot.command()
 async def ytdl(ctx, *, url):
-    await ctx.send("Проверка на попытку взлома севрера...")
+#    await ctx.send("Проверка на попытку взлома севрера...")
     test = antihack(url)
     if test == False:
         await ctx.send("!!! WARNING !!!")
@@ -157,14 +145,6 @@ async def recordq(ctx):
     await ctx.send(embed=_embed)
 
 @bot.command()
-async def log4shell(ctx):
-    await ctx.send("чел, я на питоне написан")
-    time.sleep(0.099)
-    await ctx.send("какая нахуй java?")
-    time.sleep(0.099)
-    await ctx.send("иди нахуй со своим log4shell")
-
-@bot.command()
 async def changelog(ctx):
     _embed = discord.Embed(title="Bot changelog", description="Bot changelog", color=0x0080ff)
     changelogfile = json.load(open("changelog.json"))
@@ -173,4 +153,4 @@ async def changelog(ctx):
     await ctx.send(embed=_embed)
 
 
-bot.run('OTE3MTQ4NDA0MTM0NjA0ODEw.Ya0fAw.eYIuyZhvFi2faUeCDG0MHfOatlE')
+bot.run('Token here')

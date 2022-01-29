@@ -1,6 +1,5 @@
 This is KGS Music Bot.
-
-Just install requirements and launch
+Just install requirements, write token in the end of `main.py` and launch
 
 # Start bot:
 
