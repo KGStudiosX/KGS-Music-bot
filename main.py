@@ -92,9 +92,9 @@ async def ytdl(ctx, *, url):
         await ctx.send("!!! ОБНАРУЖЕНА ПОПЫТКА ВЗЛОМА СЕРВЕРА !!!")
     else:
         await ctx.send("Загрузка...")
-        os.system('yt-dlp --output /tmp/song.mp3 --force-overwrites -f 140 "{}"'.format(url))
+        yturl = os.popen('youtube-dl -f best --get-url "{}"'.format(url)).read()
         await ctx.send("Воспроизведение...")
-        vc.play(discord.FFmpegPCMAudio("/tmp/song.mp3"), after=lambda e: print('done', e))
+        vc.play(discord.FFmpegPCMAudio(yturl), after=lambda e: print('done', e))
 
 
 @bot.command()
