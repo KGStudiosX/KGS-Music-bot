@@ -14,5 +14,9 @@
 	{
 		"ver": 1.4,
 		"changelog": "Added bot api."
+	},
+	{
+		"ver": 1.5,
+		"changelog": "Ну тут memedb есть, ну ещё блокировка юзера..."
 	}
 ]
