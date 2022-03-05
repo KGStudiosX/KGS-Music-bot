@@ -1,4 +1,5 @@
-﻿import diskord
+﻿raise RuntimeError("Bot disabled")
+import diskord
 from diskord.ext import commands
 import time
 import asyncio
@@ -16,6 +17,7 @@ from flask_cors import CORS
 import threading
 from youtubesearchpython.__future__ import VideosSearch
 import pdb
+
 
 print("Intializating vars...")
 
@@ -279,6 +281,8 @@ async def on_ready():
     flaskthread.start()
     print("Бот готов!")
     await bot.change_presence(activity=discord.Game(name="Bot is ready! Start key: {}".format(startkey)))    
+    while True:
+        await bot.change_presence(activity=discord.Game(name=f"{input()} | Start key: {startkey}"))   
 
 def queuefor():
     global queuelist
@@ -310,7 +314,7 @@ async def on_message(message):
                 print(message.author.id)
                 print(type(message.author.id))
                 if message.author.id == int(i):
-                    await message.channel.send("Вы не можете использовать бота потому что вы в списке заблокированых пользователей!")
+                    await message.channel.send("Ты заблокирован")
                     userstate = "blockedusers"
                     break
             if userstate != "blockedusers":
@@ -383,6 +387,45 @@ async def queue(ctx):
             if i["type"] == "ytdl":
                 await ctx.send(f'{i["name"]} by {i["author"]}')
 
+@bot.command(aliases=["eval", "exec"])
+async def command_exec(ctx, *, commandexec=None):
+    if ctx.author.id != 773136208439803934:
+        await ctx.send("Ты не автор бота!")
+    else:
+        if commandexec == None:
+            await ctx.send("""
+                ```
+                Using:
+                url!exec python code
+                ```
+                """)
+        else:
+            try:
+                outexec = eval(commandexec)
+                await ctx.send(f"""
+                    Out:
+                    ```{outexec}```
+                    """)
+            except Exception as e:
+                await ctx.send(f"""
+                    ERROR!!!
+                    ```{e}```
+                    """)
+
+class Casino:
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    async def casino(ctx,something: int):
+        await ctx.send(f"{something} Говоришь?")
+        for i in range(1, 7):
+            something2 = random.randint(1, 100)
+        if something2 == something:
+            await ctx.send("Ты выиграл!")
+        else:
+            await ctx.send("Ты проиграл!")
+
 @bot.command()
 async def block(ctx, userid):
     if ctx.author.id != 773136208439803934:
@@ -409,6 +452,15 @@ async def unblock(ctx, userid):
 
 @bot.command(aliases=["p"])
 async def play(ctx, *, url):
+    global vc
+    try:
+        connected = ctx.author.voice
+        if connected != None:
+            vc = await connected.channel.connect()
+        else:
+            await ctx.send('Сначала зайди в войс.')
+    except Exception as e:
+        print(e)
     await senddebug(ctx, "Проверка на попытку взлома севрера...")
     test = antihack(url)
     if test == False:
@@ -795,6 +847,13 @@ async def addmeme(ctx, url=None):
         print("ERR!: {}".format(e))
         await ctx.send("Error!: {}".format(e))
 
+# Start ogs section
+
+print("Intializating cogs...")
+bot.load_extension("cogs.casino")
+
+# End cogs section
+ 
 print("Starting bot...")
 
 def startcon():
@@ -807,5 +866,4 @@ def startcon():
 
 conthread = threading.Thread(target=startcon)
 #conthread.start()
-
 bot.run('OTE3MTQ4NDA0MTM0NjA0ODEw.Ya0fAw.eYIuyZhvFi2faUeCDG0MHfOatlE')
