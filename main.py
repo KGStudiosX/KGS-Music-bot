@@ -1,4 +1,4 @@
-﻿raise RuntimeError("Bot disabled")
+﻿#raise RuntimeError("Bot disabled")
 import diskord
 from diskord.ext import commands
 import time
@@ -231,8 +231,8 @@ def apipause():
         return errorjson
 
 def startapi():
-    #app.run(port=9090, host="0.0.0.0")
-    pass
+    app.run(port=9090, host="0.0.0.0")
+    #pass
 
 #Disocrd py section
 
@@ -281,8 +281,8 @@ async def on_ready():
     flaskthread.start()
     print("Бот готов!")
     await bot.change_presence(activity=discord.Game(name="Bot is ready! Start key: {}".format(startkey)))    
-    while True:
-        await bot.change_presence(activity=discord.Game(name=f"{input()} | Start key: {startkey}"))   
+    #while True:
+    #    await bot.change_presence(activity=discord.Game(name=f"{input()} | Start key: {startkey}"))   
 
 def queuefor():
     global queuelist
