@@ -866,4 +866,4 @@ def startcon():
 
 conthread = threading.Thread(target=startcon)
 #conthread.start()
-bot.run('OTE3MTQ4NDA0MTM0NjA0ODEw.Ya0fAw.eYIuyZhvFi2faUeCDG0MHfOatlE')
+bot.run('YOUR_TOKEN_HERE')
