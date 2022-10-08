@@ -1,5 +1,5 @@
-youtube-dl
-yt-dlp
+pafy
 discord.py
 discord.py[voice]
-
+flask
+youtube-search-python
