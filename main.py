@@ -1,16 +1,9 @@
-import diskord
-from diskord.ext import commands
-import time
-import asyncio
-from diskord.utils import get
-import json
-import os
+import discord, os, time, json, asyncio, json, pafy, random, threading
+from discord.ext import commands
+from discord.utils import get
 from funcs import *
-import pafy
-import random
 from flask import *
 from flask_cors import CORS
-import threading
 from youtubesearchpython.__future__ import VideosSearch
 
 
