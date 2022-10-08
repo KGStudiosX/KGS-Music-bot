@@ -2,29 +2,21 @@ import os
 import json
 
 def antihack(message):
-    print(1)
-    print(message)
     print(type(message))
     out = True
     test = list(message)
-    print(test)
     if "$" == test[0] or "{" == test[0] or "(" == test[0]:
-        print("WARN")
         out = False
     if out == False:
         return out
     else:
-        print(2)
         for i in test:
             if "$" == i or "{" == i or "(" == i:
-                print("WARN")
                 out = False
                 break
-        print(3)
         if out == False:
             return out
         if "$(" in message or "${" in message or "(" in message or "{" in message:
-            print("WARN")
             return False
         else:
             return True           
