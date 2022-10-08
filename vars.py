@@ -1,5 +1,7 @@
 import json
 
+TOKEN = "YOUR TOKEN HERE"
+
 errorjson = json.dumps(
     {
     "result": "false"
