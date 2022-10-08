@@ -3,6 +3,7 @@ This is KGS Music Bot. Бот находится в процессе чистк�
 Just install requirements, write token in the end of `main.py` and launch
 
 # Start bot:
+ЭТОТ КОД ЗАСТАВИЛ МЕНЯ ПОЧУСТВАТЬ СЕБЯ DISCOCKОМ!!!
 
 **Windows**:
 ```

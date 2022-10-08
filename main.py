@@ -4,44 +4,16 @@ from discord.utils import get
 from vars import *
 from funcs import *
 from flask import *
-from flask_cors import CORS
 from youtubesearchpython.__future__ import VideosSearch
 
-
-print("Intializating vars...")
-
+# ! Initialized
 app = Flask("KGS-Api-Bot")
-CORS(app)
 bot = commands.Bot(command_prefix = "url!", help_command=None)
 client = discord.Client()
 
-pausestate = False
-userstate = "none"
-botdebug=False
-currentradio = "main"
-
-queuelist = [
-    
-]
-
-blockedusers =[
-    
-]
-
-apistatusjson = {
-    "playing": "false",
-    "type": "idle",
-    "url": "none",
-    "name": "none",
-    "author": "none"
-}
 
 
-
-#Flask section
-
-print("Intializating flask pages...")
-
+# ! Flask Section
 @app.route("/", methods=["GET"])
 def index():
     print(f"Headers{request.headers}")
