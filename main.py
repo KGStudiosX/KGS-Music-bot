@@ -1,6 +1,7 @@
 import discord, os, time, json, asyncio, json, pafy, random, threading
 from discord.ext import commands
 from discord.utils import get
+from vars import *
 from funcs import *
 from flask import *
 from flask_cors import CORS
