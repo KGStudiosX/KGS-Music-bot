@@ -10,7 +10,6 @@ from youtubesearchpython.__future__ import VideosSearch
 
 print("Intializating vars...")
 
-discord = diskord
 app = Flask("KGS-Api-Bot")
 CORS(app)
 bot = commands.Bot(command_prefix = "url!", help_command=None)
