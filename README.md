@@ -1,4 +1,5 @@
-This is KGS Music Bot. Или пример того как не надо делать ботов(особенно для музыки)
+This is KGS Music Bot. Бот находится в процессе чистки кода
+
 Just install requirements, write token in the end of `main.py` and launch
 
 # Start bot:
