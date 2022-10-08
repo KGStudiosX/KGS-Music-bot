@@ -18,5 +18,9 @@
 	{
 		"ver": 1.5,
 		"changelog": "Ну тут memedb есть, ну ещё блокировка юзера..."
+	},
+	{
+		"ver": 1.6,
+		"changelog": "Начата чистка кода, добавлен contributor: romanin-rf"
 	}
 ]
