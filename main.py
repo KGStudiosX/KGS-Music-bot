@@ -822,14 +822,4 @@ bot.load_extension("cogs.casino")
  
 print("Starting bot...")
 
-def startcon():
-    while True:
-        try:
-            eval(input(">>> "))
-        except Exception as e:
-            print("Error!")
-            print(e)
-
-conthread = threading.Thread(target=startcon)
-#conthread.start()
-bot.run('YOUR_TOKEN_HERE')
+bot.run(TOKEN)
