@@ -6,7 +6,6 @@ from diskord.utils import get
 import json
 import os
 from funcs import *
-import vip
 import pafy
 import random
 from flask import *
@@ -300,7 +299,6 @@ def queuefor():
 @bot.event
 async def on_message(message):
     global userstate
-    await vip.main(message)
     if (message.content.startswith('url!')):
         if message.guild.id == 676339202245525505:
             print("Command!") # Не обращайте внимание...
