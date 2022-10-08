@@ -1,13 +1,10 @@
-﻿#raise RuntimeError("Bot disabled")
 import diskord
 from diskord.ext import commands
 import time
 import asyncio
 from diskord.utils import get
-#from youtube_dl import YoutubeDL
 import json
 import os
-#from google.cloud import dialogflow
 from funcs import *
 import vip
 import pafy
@@ -16,7 +13,6 @@ from flask import *
 from flask_cors import CORS
 import threading
 from youtubesearchpython.__future__ import VideosSearch
-import pdb
 
 
 print("Intializating vars...")
@@ -331,12 +327,6 @@ async def on_message(message):
             await message.channel.send("Bot developer contacts:\nDiscord: TendingStream73#5806")    
             await message.channel.send("Этот бот не моэет работать с несколькими серверами.")
             await message.channel.send("Данные для контакта с разработчиком бота:\nDiscord: TendingStream73#5806")
-        #_embed = discord.Embed(title="Сообщение от автора бота", description="Бот на востановлении")
-        #_embed.add_field(name="Почему бот на востановлении?", value="Из-за одного гения***(гений от слова гей)***(гений: MaxSmokeSkaarj) файлы бота были потеряны на хосте(кгс)")
-        #_embed.add_field(name="Как долго будут востанавливатся файлы?", value="Не знаю.")
-        #_embed.add_field(name="KotMilkMeow момент?", value="Да.")
-        #await message.channel.send(embed=_embed)
-        #await message.channel.send("Пошел нахуй я сломан.") # Идея by Krashik#0857
 
     else:
         print("+-------------------------+")
@@ -387,9 +377,11 @@ async def queue(ctx):
             if i["type"] == "ytdl":
                 await ctx.send(f'{i["name"]} by {i["author"]}')
 
+		
+@bot.is_owner()
 @bot.command(aliases=["eval", "exec"])
 async def command_exec(ctx, *, commandexec=None):
-    if ctx.author.id != 773136208439803934:
+    if False:
         await ctx.send("Ты не автор бота!")
     else:
         if commandexec == None:
