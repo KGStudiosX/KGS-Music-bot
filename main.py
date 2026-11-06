@@ -5,13 +5,19 @@ from vars import *
 from funcs import *
 from flask import *
 from youtubesearchpython.__future__ import VideosSearch
+from typing import TypedDict
+
+# ! Types
+class ServerState(TypedDict):
+    vc: discord.member.VoiceState
+    queue: dict
 
 # ! Initialized
 app = Flask("KGS-Api-Bot")
 bot = commands.Bot(command_prefix = "url!", help_command=None)
 client = discord.Client()
 
-
+servers: dict[int, ServerState] = {}
 
 # ! Flask Section
 @app.route("/", methods=["GET"])
@@ -84,7 +90,7 @@ def apiplay():
         apistatusjson["playing"] = "true"
         apistatusjson["type"] = "url"
         apistatusjson["url"] = str(url)
-        vc.play(discord.FFmpegPCMAudio(url), after=lambda e: on_complete_playing(e))
+        servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(url), after=lambda e: on_complete_playing(e))
         return compjson
     except Exception as e:
         print(e)
@@ -103,7 +109,7 @@ def apiytdl():
             apistatusjson["author"] = str(video.author)
             apistatusjson["url"] = str(url)
             audio = video.getbestaudio()
-            vc.play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
+            servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
             return compjson
         except Exception as e:
             print(e)
@@ -117,7 +123,7 @@ def apirecord():
     if "niggers" == "niggers":
         try:
             needradio = request.args.get("r")
-            vc.play(discord.FFmpegPCMAudio(radioldb[needradio]), after=lambda e: on_complete_playing(e))  
+            servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(radioldb[needradio]), after=lambda e: on_complete_playing(e))  
             return compjson
         except Exception as e:
             print(e)
@@ -130,7 +136,7 @@ def apistop():
     print(f"Headers{request.headers}")
     if "niggers" == "niggers":
         try:
-            vc.stop()
+            servers[ctx.guild.id]['vc'].stop()
             apistatusjson["playing"] = "false"
             apistatusjson["type"] = "idle"
             apistatusjson["url"] = "none"
@@ -150,7 +156,7 @@ def apipause():
     if "niggers" == "niggers":
         try:
             if pausestate == False:
-                vc.pause()
+                servers[ctx.guild.id]['vc'].pause()
                 pausestate = True
                 apistatusjson["playing"] = "false"
                 oldtypestatusjson = apistatusjson["type"]
@@ -159,7 +165,7 @@ def apipause():
                 "result": "true", "playing": "false"
                 })
             elif pausestate == True:
-                vc.resume()
+                servers[ctx.guild.id]['vc'].resume()
                 pausestate = False
                 apistatusjson["playing"] = "true"
                 apistatusjson["type"] = oldtypestatusjson
@@ -173,7 +179,7 @@ def apipause():
         return errorjson
 
 def startapi():
-    app.run(port=9090, host="0.0.0.0")
+    #app.run(port=9090, host="0.0.0.0")
     #pass
 
 #Disocrd py section
@@ -205,7 +211,7 @@ def on_complete_playing(e):
             print("Yes!")
             print("Playing file...")
             apistatusjson = queuelist[0]
-            vc.play(discord.FFmpegPCMAudio(queuelist[0]["playurl"]), after=lambda e: on_complete_playing(e))
+            servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(queuelist[0]["playurl"]), after=lambda e: on_complete_playing(e))
 
 
 async def senddebug(ctx,message):
@@ -233,7 +239,7 @@ def queuefor():
             for i in queuelist:
                 while True:
                     try:
-                        vc.play(discord.FFmpegPCMAudio(i), after=lambda e: on_complete_playing(e))
+                        servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(i), after=lambda e: on_complete_playing(e))
                         break
                     except:
                         pass
@@ -388,12 +394,14 @@ async def unblock(ctx, userid):
         await ctx.send("Ты не автор бота!")
 
 @bot.command(aliases=["p"])
-async def play(ctx, *, url):
-    global vc
+async def play(ctx: commands.Context, *, url):
+    if servers.get(ctx.guild.id, None) == None: # If there is no server...
+        # Initialize it's state in servers dict
+        servers[ctx.guild.id] = {}
     try:
         connected = ctx.author.voice
         if connected != None:
-            vc = await connected.channel.connect()
+            servers[ctx.guild.id]['vc'] = await connected.channel.connect()
         else:
             await ctx.send('Сначала зайди в войс.')
     except Exception as e:
@@ -429,7 +437,7 @@ async def play(ctx, *, url):
                     }
                     queuelist.append(queuefile)
                     #await ctx.send("Воспроизведение...")
-                    vc.play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
+                    servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
                     _embed = discord.Embed(color=0x0080ff)
                     _embed.add_field(value=f"[{video.title} by {video.author}]({url})", name="Will now play")
                     _embed.set_image(url=video.thumb)
@@ -471,7 +479,7 @@ async def play(ctx, *, url):
                         "url": vidurl,
                         "playurl": audio.url
                     }
-                    vc.play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
+                    servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
                     queuelist.append(queuefile)
                     _embed = discord.Embed(color=0x0080ff)
                     _embed.add_field(value=f"[{video.title} by {video.author}]({vidurl})", name="Will now play")
@@ -516,7 +524,7 @@ async def play(ctx, *, url):
                         "playurl": url
                     }
                     queuelist.append(queuefile)
-                    vc.play(discord.FFmpegPCMAudio(url), after=lambda e: on_complete_playing(e))
+                    servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(url), after=lambda e: on_complete_playing(e))
                 else:
                     queuefile = {
                         "playing": "true",
@@ -556,7 +564,7 @@ async def join(ctx):
 @bot.command()
 async def leave(ctx):
     await ctx.send("Ок, выхожу...")
-    await vc.disconnect()
+    await servers[ctx.guild.id]['vc'].disconnect()
 
 @bot.command()
 async def pause(ctx):
@@ -564,13 +572,13 @@ async def pause(ctx):
     global oldtypestatusjson
     try:
         if pausestate == False:
-            vc.pause()
+            servers[ctx.guild.id]['vc'].pause()
             pausestate = True
             apistatusjson["playing"] = "false"
             oldtypestatusjson = apistatusjson["type"]
             apistatusjson["type"] = "pause"
         elif pausestate == True:
-            vc.resume()
+            servers[ctx.guild.id]['vc'].resume()
             pausestate = False
             apistatusjson["playing"] = "true"
             apistatusjson["type"] = oldtypestatusjson
@@ -585,7 +593,7 @@ async def stop(ctx):
     apistatusjson["url"] = "none"
     apistatusjson["name"] = "none"
     apistatusjson["author"] = "none"
-    vc.stop()
+    servers[ctx.guild.id]['vc'].stop()
 
 @bot.command()
 async def hello(ctx):
@@ -619,7 +627,7 @@ async def ytdl(ctx, *, url):
             print("Playing...")
             queuefile = {}
             await ctx.send("Воспроизведение...")
-            vc.play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
+            servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
         except:
             print("This is not a url")
             print("Trying to search...")
@@ -636,7 +644,7 @@ async def ytdl(ctx, *, url):
             audio = video.getbestaudio()
             print("Playing...")
             await ctx.send("Воспроизведение...")
-            vc.play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
+            servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(audio.url), after=lambda e: on_complete_playing(e))
 
 
 @bot.command()
@@ -651,7 +659,7 @@ async def record(ctx, needradio="main"):
     apistatusjson["type"] = "radio"
     # only play music if user is in a voice channel
     if voice_channel!= None:
-        vc.play(discord.FFmpegPCMAudio(radioldb[needradio]), after=lambda e: on_complete_playing(e))
+        servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(radioldb[needradio]), after=lambda e: on_complete_playing(e))
         currentradio=needradio
     else:
         await ctx.send('Сначала войди в войс.')
@@ -668,14 +676,14 @@ async def nightride(ctx):
     apistatusjson["type"] = "radio"
     # only play music if user is in a voice channel
     if voice_channel!= None:
-        vc.play(discord.FFmpegPCMAudio("https://stream.nightride.fm/nightride.m4a"), after=lambda e: on_complete_playing(e))
+        servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio("https://stream.nightride.fm/nightride.m4a"), after=lambda e: on_complete_playing(e))
     else:
         await ctx.send('Сначала войди в войс.')
 
 @bot.command()
 async def radio(ctx, c1, c2):
     radio_list = json.load(open("radio.json"))
-    vc.play(discord.FFmpegPCMAudio(radio_list[c1][c2]), after=lambda e: on_complete_playing(e))
+    servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(radio_list[c1][c2]), after=lambda e: on_complete_playing(e))
 
 @bot.command()
 async def radio_list(ctx):
@@ -691,14 +699,6 @@ async def recordq(ctx):
     _embed = discord.Embed(title=tracklist["song"], description=tracklist["artist"], color=0x0080ff)
     # _embed.add_field(name=tracklist["artist"], value=tracklist["song"], inline=True)
     await ctx.send(embed=_embed)
-
-@bot.command()
-async def log4shell(ctx):
-    await ctx.send("чел, я на питоне написан")
-    time.sleep(0.099)
-    await ctx.send("какая нахуй java?")
-    time.sleep(0.099)
-    await ctx.send("иди нахуй со своим log4shell")
 
 @bot.command()
 async def changelog(ctx):
@@ -738,7 +738,7 @@ async def playfile(ctx):
                     "playurl": url
                 }
                 queuelist.append(queuefile)
-                vc.play(discord.FFmpegPCMAudio(url), after=lambda e: on_complete_playing(e))
+                servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(url), after=lambda e: on_complete_playing(e))
             else:
                 queuefile = {
                     "playing": "true",
@@ -784,10 +784,10 @@ async def addmeme(ctx, url=None):
         print("ERR!: {}".format(e))
         await ctx.send("Error!: {}".format(e))
 
-# Start ogs section
+# Start cogs section
 
 print("Intializating cogs...")
-bot.load_extension("cogs.casino")
+#bot.load_extension("cogs.casino") # TODO: This has now become a corountine
 
 # End cogs section
  
