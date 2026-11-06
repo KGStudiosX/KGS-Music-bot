@@ -243,7 +243,7 @@ def queuefor():
                 pass
 
 
-@bot.event
+#@bot.event #  TendingStream73: disable this for now
 async def on_message(message):
     global userstate
     if (message.content.startswith('url!')):
