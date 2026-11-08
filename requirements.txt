@@ -1,5 +1,7 @@
 pafy
 discord.py
 discord.py[voice]
-flask
+fastapi[standard]
+git+https://github.com/ytdl-org/youtube-dl
 youtube-search-python
+pyyaml

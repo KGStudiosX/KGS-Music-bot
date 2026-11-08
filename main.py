@@ -1,26 +1,51 @@
+from youtube_dl.extractor import once
+import loguru
 import discord, os, time, json, asyncio, json, pafy, random, threading
 from discord.ext import commands
 from discord.utils import get
 from vars import *
 from funcs import *
-from flask import *
-from youtubesearchpython.__future__ import VideosSearch
+from fastapi import FastAPI
+from youtube_search import YoutubeSearch
 from typing import TypedDict
+from loguru import logger
+from yaml import load, CLoader
+
+__name__ = "KGS-Music-bot"
 
 # ! Types
+class Status(TypedDict):
+    status: str
+    type: str
+    title: str
+    author: str
+    url: str
+
+class Queue(TypedDict):
+    type: str
+    url: str
+    title: str
+    author: str
+    full_name: str
+
 class ServerState(TypedDict):
-    vc: discord.member.VoiceState
-    queue: dict
+    vc: discord.VoiceClient
+    queue: list[Queue]
+    status: Status
 
 # ! Initialized
-app = Flask("KGS-Api-Bot")
-bot = commands.Bot(command_prefix = "url!", help_command=None)
-client = discord.Client()
+
+logger.info("Starting...")
+config = load(open("conf.yaml"), CLoader)
+
+app = FastAPI()
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix = "url!", help_command=None, intents=intents)
+client = discord.Client(intents=None)
 
 servers: dict[int, ServerState] = {}
-
 # ! Flask Section
-@app.route("/", methods=["GET"])
+@app.get("/") # TODO: Switch to static file serving
 def index():
     print(f"Headers{request.headers}")
     return """
@@ -65,24 +90,24 @@ html, body{
 <br>Возврашаает статус воспроизведения</br>
 """
 
-@app.route("/status", methods=["GET"])
+@app.get("/status")
 async def apistatus():
     print(f"Headers{request.headers}")
     if "niggers" == "niggers":
         return json.dumps(apistatusjson)
     else:
         return "Suck your fucking dick nigga"
-@app.route("/queue", methods=["GET"])
+@app.get("/queue")
 async def apiqueue():
     return json.dumps(queuelist)
 
-@app.route("/recordq", methods=["GET"])
+@app.get("/recordq")
 def apirecordq():
     print(f"Headers{request.headers}")
     needradio = request.args.get('r')
     return json.dumps(parsejson(radiodb[needradio]))
 
-@app.route("/play", methods=["GET"])
+@app.get("/play")
 def apiplay():
     print(f"Headers{request.headers}")
     try:
@@ -96,7 +121,7 @@ def apiplay():
         print(e)
         return errorjson
 
-@app.route("/ytdl", methods=["GET"])
+@app.get("/ytdl")
 def apiytdl():
     print(f"Headers{request.headers}")
     if "niggers" == "niggers":
@@ -117,7 +142,7 @@ def apiytdl():
     else:
         return errorjson
 
-@app.route("/record", methods=["GET"])
+@app.get("/record")
 def apirecord():
     print(f"Headers{request.headers}")
     if "niggers" == "niggers":
@@ -131,7 +156,7 @@ def apirecord():
     else:
         return errorjson
 
-@app.route("/stop")
+@app.get("/stop")
 def apistop():
     print(f"Headers{request.headers}")
     if "niggers" == "niggers":
@@ -148,7 +173,7 @@ def apistop():
     else:
         return "Suck your fucking dick nigga"
 
-@app.route("/pause")
+@app.get("/pause")
 def apipause():
     global pausestate
     global oldtypestatusjson
@@ -180,26 +205,21 @@ def apipause():
 
 def startapi():
     #app.run(port=9090, host="0.0.0.0")
-    #pass
+    pass
 
 #Disocrd py section
 
 print("Intializating diskord.py")
 
-def on_complete_playing(e):
+def on_complete_playing(e, gid: int):
     print(e)
     global apistatusjson
-    if queuelist == []:
+    if servers[gid]['queue'] == []:
         print("Clearing api status...")
-        apistatusjson["playing"] = "false"
-        apistatusjson["type"] = "idle"
-        apistatusjson["url"] = "none"
-        apistatusjson["name"] = "none"
-        apistatusjson["author"] = "none"
+        servers[gid]['status']['status'] = 'idle'
     else:
         print("Is queue has a file to play?")
-        del queuelist[0]
-        if queuelist == []:
+        if servers[gid]['queue'] == []:
             print("No!")
             print("Clearing api status...")
             apistatusjson["playing"] = "false"
@@ -210,8 +230,9 @@ def on_complete_playing(e):
         else:
             print("Yes!")
             print("Playing file...")
-            apistatusjson = queuelist[0]
-            servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(queuelist[0]["playurl"]), after=lambda e: on_complete_playing(e))
+            i = servers[gid]['queue'][0]
+            servers[gid]['vc'].play(discord.FFmpegPCMAudio(process_url(i['url'], True)['playback_url']), after=lambda e: on_complete_playing(e, gid))
+            del servers[gid]['queue'][0]
 
 
 async def senddebug(ctx,message):
@@ -328,9 +349,8 @@ async def queue(ctx):
             if i["type"] == "ytdl":
                 await ctx.send(f'{i["name"]} by {i["author"]}')
 
-		
-@bot.is_owner()
 @bot.command(aliases=["eval", "exec"])
+@commands.is_owner()
 async def command_exec(ctx, *, commandexec=None):
     if False:
         await ctx.send("Ты не автор бота!")
@@ -393,26 +413,69 @@ async def unblock(ctx, userid):
     else:
         await ctx.send("Ты не автор бота!")
 
+class ProcessedURL(TypedDict):
+    playback_url: str
+    embed: discord.Embed
+    q_entry: Queue
+
+@logger.catch
+def process_url(url: str, want_playback: bool) -> ProcessedURL:
+    if url.startswith("https://youtube.com"):
+        raise Exception("YT currently not supported")
+    else:
+        embed = discord.Embed(color=0x0080ff)
+        embed.add_field(value=f"{url}", name="Now playing")
+        ret: ProcessedURL = {
+            "playback_url": url,
+            "embed": embed,
+            "q_entry": {
+                "type": "direct",
+                "url": url,
+                "title": url,
+                "full_name": url,
+                "author": "Unknown"
+            }
+        }
+        return ret
+
 @bot.command(aliases=["p"])
 async def play(ctx: commands.Context, *, url):
     if servers.get(ctx.guild.id, None) == None: # If there is no server...
         # Initialize it's state in servers dict
-        servers[ctx.guild.id] = {}
+        servers[ctx.guild.id] = {'queue': [], 'status': {'status': 'idle'}}
     try:
-        connected = ctx.author.voice
+        connected: discord.member.VoiceState = ctx.author.voice
         if connected != None:
             servers[ctx.guild.id]['vc'] = await connected.channel.connect()
         else:
             await ctx.send('Сначала зайди в войс.')
     except Exception as e:
         print(e)
+    await ctx.send("CURRENTLY DISABLED")
+    if antihack(url) == False:
+        await ctx.send("Please check your url, as it may contain stuff that triggered anti-shell injection")
+        return
+    processed = process_url(url, len(servers[ctx.guild.id].get("queue", [])) == 0)
+    if servers[ctx.guild.id]['status']['status'] != 'idle':
+        servers[ctx.guild.id]['queue'].append(processed['q_entry'])
+        print("added")
+    else:
+        logger.info(processed)
+        servers[ctx.guild.id]['status']['type'] = processed['q_entry']['type']
+        servers[ctx.guild.id]['status']['title'] = processed['q_entry']['title']
+        servers[ctx.guild.id]['status']['author'] = processed['q_entry']['author']
+        servers[ctx.guild.id]['status']['url'] = processed['q_entry']['url']
+        servers[ctx.guild.id]['status']['status'] = 'playing'
+        servers[ctx.guild.id]['vc'].play(discord.FFmpegPCMAudio(processed['playback_url']), after=lambda e: on_complete_playing(e, ctx.guild.id))
+        await ctx.send(embed=processed['embed'])
+    return
     await senddebug(ctx, "Проверка на попытку взлома севрера...")
     test = antihack(url)
     if test == False:
         await ctx.send("!!! WARNING !!!")
         await ctx.send("!!! ОБНАРУЖЕНА ПОПЫТКА ВЗЛОМА БОТА !!!")
     else:
-        if checkyoutubeurl(url) == "ytdl":
+        if checkyoutubeurl(url) == "ytdl": # TODO: Unify this
             await senddebug(ctx, "Получение url...")
             #os.system('yt-dlp --output /tmp/song.mp3 --force-overwrites -f 140 "{}"'.format(url))
             try:
@@ -553,11 +616,13 @@ async def nowplaying(ctx):
         await ctx.send("Radio is playing now.")
 
 @bot.command()
-async def join(ctx):
-    global vc
-    connected = ctx.author.voice
+async def join(ctx: discord.ext.commands.Context):
+    if servers.get(ctx.guild.id, None) == None: # If there is no server...
+        # Initialize it's state in servers dict
+        servers[ctx.guild.id] = {}
+    connected: discord.member.VoiceState = ctx.author.voice
     if connected != None:
-        vc = await connected.channel.connect()
+        servers[ctx.guild.id]['vc'] = await connected.channel.connect()
     else:
         await ctx.send('Сначала зайди в войс.')
 
@@ -793,4 +858,4 @@ print("Intializating cogs...")
  
 print("Starting bot...")
 
-bot.run(TOKEN)
+bot.run(config['token'])
