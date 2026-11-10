@@ -1,7 +1,7 @@
 # NOTICE
-This source code is outdated, and the bot has become a part of a https://github.com/SachaTending/tendbot. Please use tendbot instead for music part
+I'm currently upgrading bot and adding new capabilites, such as an ability to play music on multiple discord servers and modular architecture
 
-This is KGS Music Bot. Бот находится в процессе чистки кода
+This is a KGS Music Bot. Бот находится в процессе чистки кода
 
 Just install requirements, write token in the end of `main.py` and launch
 
